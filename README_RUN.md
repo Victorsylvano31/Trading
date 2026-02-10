@@ -8,7 +8,7 @@ Ce petit guide explique comment installer les dépendances et lancer l'applicati
   - `diabetes_model.sav`
   - `heart_disease_model.sav`
   - `parkinsons_model.sav`
-  - `asthme.sav` (si utilisé)
+  - `asthme.sav` 
 
 ## Installation (recommandé: environnement virtuel)
 ```bash
