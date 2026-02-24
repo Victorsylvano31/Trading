@@ -9,10 +9,22 @@ st.set_page_config(page_title="PredictiveCare", page_icon="🩺", layout="center
 
 # Charger les modèles
 working_dir = os.path.dirname(os.path.abspath(__file__))
-diabetes_model = pickle.load(open(os.path.join(working_dir, 'saved_models', 'diabetes_model.sav'), 'rb'))
-heart_disease_model = pickle.load(open(os.path.join(working_dir, 'saved_models', 'heart_disease_model.sav'), 'rb'))
-parkinsons_model = pickle.load(open(os.path.join(working_dir, 'saved_models', 'parkinsons_model.sav'), 'rb'))
-asthma_model = pickle.load(open(os.path.join(working_dir, 'saved_models', 'asthme.sav'), 'rb'))
+
+def load_model(file_name):
+    path = os.path.join(working_dir, 'saved_models', file_name)
+    try:
+        return pickle.load(open(path, 'rb'))
+    except FileNotFoundError:
+        st.error(f"Erreur : Le modèle '{file_name}' est introuvable au chemin : {path}")
+        return None
+    except Exception as e:
+        st.error(f"Une erreur est survenue lors du chargement de '{file_name}' : {e}")
+        return None
+
+diabetes_model = load_model('diabetes_model.sav')
+heart_disease_model = load_model('heart_disease_model.sav')
+parkinsons_model = load_model('parkinsons_model.sav')
+asthma_model = load_model('asthme.sav')
 
 # Menu de navigation avec icônes dans la barre latérale
 with st.sidebar:
@@ -38,7 +50,11 @@ if page == "Accueil":
     """, unsafe_allow_html=True)
 
     # Image ou illustration (ajoutez votre propre image)
-    st.image("C:/Users/Vahoaka/multiple-disease-prediction-streamlit-app-main/image/ccc.png", caption="'' L'intelligence artificielle au service de la santé ''", use_column_width=True)
+    logo_path = os.path.join(working_dir, 'image', 'ccc.png')
+    if os.path.exists(logo_path):
+        st.image(logo_path, caption="'' L'intelligence artificielle au service de la santé ''", use_column_width=True)
+    else:
+        st.info("Image d'illustration non trouvée.")
 
     st.markdown("</div>", unsafe_allow_html=True)  # Fermer la balise div
 
@@ -279,7 +295,7 @@ elif page == "Prédiction de Parkinson":
             st.info("Conseil : Continuez à mener une vie active et saine.")
 
 # Page de prédiction de l'asthme
-if page == "Prédiction d'Asthme":
+elif page == "Prédiction d'Asthme":
         st.title ( "Prédiction d'Asthme 💨" )
 
         # Exemple de données à préremplir
@@ -315,7 +331,7 @@ if page == "Prédiction d'Asthme":
         # Créer des sections pour le formulaire
         with st.expander ( "Informations personnelles", expanded=True ):
             Age = st.number_input ( "Âge", min_value=0, max_value=120, step=1, value=example_data["Age"] )
-            Gender = st.selectbox ( "Genre (0 Homme, 1 Femme ", ["1", "0"], index=example_data["Gender"] )
+            Gender = st.selectbox ( "Genre (0 Homme, 1 Femme)", options=[0, 1], format_func=lambda x: "Homme" if x == 0 else "Femme", index=example_data["Gender"] )
             # Utilisation correcte de l'index pour l'ethnicité
             Ethnicity = st.selectbox ( "Ethnicité :0 - 1 - 2", ["0", "1", "2"],
                                        index=int ( example_data["Ethnicity"] ) )
@@ -375,7 +391,7 @@ if page == "Prédiction d'Asthme":
             # Préparation des données d'entrée pour le modèle
             patient_data = [
                 int ( Age ),
-                0 if Gender == 'Homme' else 1,  # Convertir le genre en numérique
+                int ( Gender ),  # Déjà converti par le selectbox
                 int ( Ethnicity ),
                 int ( EducationLevel ),
                 float ( BMI ),
